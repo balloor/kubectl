@@ -1,0 +1,70 @@
+---
+- hosts: all
+  tasks:
+    - name: Upgrade OS
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Pakete Installieren
+      apt:
+        name: 
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+        state: present
+        update_cache: yes
+  
+- hosts: master
+  tasks:
+    - name: Add an apt signing key for kubectl
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Add specified repository into sources list
+      apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+
+    - name: kubectl, kubeadm, kubelet Installieren
+      apt:
+        name: 
+        - kubectl
+        - kubeadm
+        - kubelet
+        state: present
+        update_cache: yes
+
+    - name: Add an apt signing key for docker
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add specified repository into sources list
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: docker Installieren
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Dienst starten und in Bootprozess integrieren
+      service:
+        name: 
+        - docker
+        - kubelet
+        state: started
+        enabled: yes 
+
+    - name: Dienst starten und in Bootprozess integrieren
+      service:
+        name: 
+        - docker
+        - kubelet
+        state: enable
+        enabled: yes 
